@@ -50,6 +50,10 @@ app.use("/api/aggregate", aggregate);
 app.use("/api/customer", customer);
 app.use("/api/trucker", trucker);
 
+app.get("/", function (req, res) {
+  res.send("welcome to the app");
+});
+
 createTables();
 
 // Set PORT and start server
