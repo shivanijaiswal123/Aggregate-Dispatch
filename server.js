@@ -11,6 +11,10 @@ const bodyParser = require("body-parser");
 var db = require("./dbSetup");
 require("./passport/index")(passport);
 
+setInterval(function () {
+  db.query("SELECT 1");
+}, 5000);
+
 // Initialize Express App
 const app = express();
 
