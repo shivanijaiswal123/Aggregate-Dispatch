@@ -9,10 +9,13 @@ var conn = mysql.createConnection({
   multipleStatements: true,
 });
 
-module.exports = conn;
+// var conn = mysql.createConnection({
+//   host: "localhost",
+//   user: "root",
+//   password: "root",
+//   port: "3306",
+//   database: "Dispatch",
+//   multipleStatements: true,
+// });
 
-// host: "127.0.0.1",
-// port: "3306",
-// user: "root",
-// password: "root",
-// database: "laundry",
+module.exports = conn;

@@ -18,7 +18,12 @@ const app = express();
 app.use(express.json());
 
 // CORS package
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://aggregate-dispatch.herokuapp.com/",
+    credentials: true,
+  })
+);
 app.use(bodyParser.json());
 app.use(flash());
 // Passport initialization

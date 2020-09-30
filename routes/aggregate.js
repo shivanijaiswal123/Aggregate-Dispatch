@@ -141,94 +141,103 @@ router.post("/member", auth, (req, res) => {
   let userId = req.user.userId;
   let company_id1 = req.body.aggregate_company_id;
 
-  console.log("userId:", userId);
-  console.log("role:", req.body.user_role);
-  console.log("aggregate_company_id:", company_id1);
+  console.log(userId, company_id1);
 
   // Validate that user can perform this function
-  // select_admin =
-  //   "SELECT * FROM aggregate_user WHERE aggregate_user_id = ? AND role = ? AND aggregate_company_id = ?";
+  select_admin =
+    "SELECT * FROM aggregate_user WHERE aggregate_user_id = ? AND role = ? AND aggregate_company_id = ?";
 
-  // db.query(select_admin, [userId, req.body.user_role, company_id1], function (
-  //   err,
-  //   results
-  // ) {
-  //   if (err) {
-  //     return res
-  //       .status(400)
-  //       .json({ success: false, message: "Unknown Server Error" });
-  //   }
-  //   console.log(results);
-
-  // Check if member already exists
-  select_member = "SELECT * FROM aggregate_user WHERE email=?";
-  db.query(select_member, [req.body.email], function (err, memberResults) {
+  db.query(select_admin, [userId, "Admin", company_id1], function (
+    err,
+    results
+  ) {
     if (err) {
       return res
         .status(400)
         .json({ success: false, message: "Unknown Server Error" });
     }
-    if (memberResults[0]) {
-      return res
-        .status(400)
-        .json({ success: false, message: "This Member Already Exists" });
-    } else {
-      var generateHash = function (password) {
-        return bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
-      };
-      var name = req.body.name;
-      var email = req.body.email;
-      var role = req.body.user_role;
-      var phone_no = req.body.phone_no;
-      var password = generateHash("12345");
-      var company_id = req.body.aggregate_company_id;
-      add_user = "INSERT INTO aggregate_user SET ?";
-      // Add aggregate_user
-      db.query(
-        add_user,
-        {
-          name,
-          email,
-          password,
-          phone_no,
-          role,
-          aggregate_company_id: company_id,
-        },
-        function (err, userResults) {
-          if (err) {
-            return res
-              .status(400)
-              .json({ success: false, message: "Unknown Server Error" });
-          } else {
-            let jwtKey = config.get("jwtSecret");
-            jwt.sign({ userId: userResults.insertId }, jwtKey, (err, token) => {
+    console.log(results);
+    if (results[0]) {
+      // Check if member already exists
+      select_member = "SELECT * FROM aggregate_user WHERE email=?";
+      db.query(select_member, [req.body.email], function (err, memberResults) {
+        if (err) {
+          return res
+            .status(400)
+            .json({ success: false, message: "Unknown Server Error" });
+        }
+        if (memberResults[0]) {
+          return res
+            .status(400)
+            .json({ success: false, message: "This Member Already Exists" });
+        } else {
+          var generateHash = function (password) {
+            return bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
+          };
+          var name = req.body.name;
+          var email = req.body.email;
+          var role = req.body.user_role;
+          var phone_no = req.body.phone_no;
+          var password = generateHash("12345");
+          var company_id = req.body.aggregate_company_id;
+          add_user = "INSERT INTO aggregate_user SET ?";
+          // Add aggregate_user
+          db.query(
+            add_user,
+            {
+              name,
+              email,
+              password,
+              phone_no,
+              role,
+              aggregate_company_id: company_id,
+            },
+            function (err, userResults) {
               if (err) {
+                return res
+                  .status(400)
+                  .json({ success: false, message: "Unknown Server Error" });
               } else {
-                added_user = `SELECT * FROM aggregate_user WHERE ?`;
-                db.query(
-                  added_user,
-                  { aggregate_user_id: userResults.insertId },
-                  function (err, rows) {
+                let jwtKey = config.get("jwtSecret");
+                jwt.sign(
+                  { userId: userResults.insertId },
+                  jwtKey,
+                  (err, token) => {
                     if (err) {
-                      console.log(err);
-                      return res.status(400).json({
-                        success: false,
-                        message: "Unknown Server Error",
-                      });
                     } else {
-                      return res.status(200).json({
-                        success: true,
-                        message: "Member Added",
-                        member: rows[0],
-                      });
+                      added_user = `SELECT * FROM aggregate_user WHERE ?`;
+                      db.query(
+                        added_user,
+                        { aggregate_user_id: userResults.insertId },
+                        function (err, rows) {
+                          if (err) {
+                            console.log(err);
+                            return res.status(400).json({
+                              success: false,
+                              message: "Unknown Server Error",
+                            });
+                          } else {
+                            return res.status(200).json({
+                              success: true,
+                              message: "Member Added",
+                              member: rows[0],
+                            });
+                          }
+                        }
+                      );
                     }
                   }
                 );
               }
-            });
-          }
+            }
+          );
         }
-      );
+      });
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "User Not Authenticated To Perfom This Task",
+      });
     }
   });
 });
@@ -243,54 +252,41 @@ router.get("/member", auth, (req, res) => {
 
   checkAggregateAdmin(userId, company_id1, function (adminValidity) {
     console.log(adminValidity);
-    getAllMembers(company_id1, function (fetchedMembers) {
-      if (fetchedMembers[0] == false) {
-        return res
-          .status(400)
-          .json({ success: false, message: fetchedMembers[1] });
-      } else {
-        return res.status(200).json({
-          success: true,
-          message: fetchedMembers[1],
-          members: fetchedMembers[2],
-        });
-      }
-    });
-    // adminValidity = true
-    // if (adminValidity[0] == false) {
-    //   console.log(adminValidity[1])
-    //   return res
-    //     .status(400)
-    //     .json({ success: false, message: adminValidity[1] });
-    // } else {
-    //   getAllMembers(company_id1, function (fetchedMembers) {
-    //     if (fetchedMembers[0] == false) {
-    //       return res
-    //         .status(400)
-    //         .json({ success: false, message: fetchedMembers[1] });
-    //     } else {
-    //       return res.status(200).json({
-    //         success: true,
-    //         message: fetchedMembers[1],
-    //         members: fetchedMembers[2],
-    //       });
-    //     }
-    //   });
-    // }
+    adminValidity = true;
+    if (adminValidity[0] == false) {
+      console.log(adminValidity[1]);
+      return res
+        .status(400)
+        .json({ success: false, message: adminValidity[1] });
+    } else {
+      getAllMembers(company_id1, function (fetchedMembers) {
+        if (fetchedMembers[0] == false) {
+          return res
+            .status(400)
+            .json({ success: false, message: fetchedMembers[1] });
+        } else {
+          return res.status(200).json({
+            success: true,
+            message: fetchedMembers[1],
+            members: fetchedMembers[2],
+          });
+        }
+      });
+    }
   });
 });
 
 // @DESCRIPTION: This Route Is Used To Add A Quarry To The Aggregate Company By The Admin
 // @headers: x_auth_token, @body: aggregate_company_id,name,address_line_1,address_line_2,city,pincode,state
 router.post("/quarry", auth, (req, res) => {
+  console.log("entered");
   let userId = req.user.userId;
   let company_id1 = req.body.aggregate_company_id;
 
   // Check If User Is Admin
   checkAggregateAdmin(userId, company_id1, function (validity) {
-
     console.log("validity :", validity);
-    
+
     if (validity[0] == false) {
       return res.status(400).json({ success: false, message: validity[1] });
     } else {
@@ -306,7 +302,6 @@ router.post("/quarry", auth, (req, res) => {
       // Check If Quarry With The Same Name And Company Id Exists
       checkQuarryExists(name, company_id1, function (quarry) {
         if (quarry[0] == false) {
-          
           return res.status(400).json({ success: false, message: quarry[1] });
         } else {
           // Add New Quarry
@@ -328,7 +323,6 @@ router.post("/quarry", auth, (req, res) => {
                   fetchedQuarry
                 ) {
                   if (fetchedQuarry[0] == false) {
-                    
                     return res
                       .status(400)
                       .json({ success: false, message: fetchedQuarry[1] });
@@ -356,8 +350,10 @@ router.put("/quarry/:quarry_id/manager/:manager_id", auth, (req, res) => {
   let company_id1 = req.body.aggregate_company_id;
   let quarry_id = req.params.quarry_id;
   let manager_id = req.params.manager_id;
+
   checkAggregateAdmin(userId, company_id1, function (validity) {
     if (validity[0] == false) {
+      console.log(validity);
       return res.status(400).json({ success: false, message: validity[1] });
     } else {
       checkQuarryByIdAndCompany(quarry_id, company_id1, function (
@@ -374,7 +370,7 @@ router.put("/quarry/:quarry_id/manager/:manager_id", auth, (req, res) => {
                 .status(400)
                 .json({ success: false, message: user_role[1] });
             } else {
-              if (user_role[1] == "Quarry Manager") {
+              if (user_role[1] == "x") {
                 assignQuarryManager(quarry_id, manager_id, function (
                   updated_quarry
                 ) {
@@ -474,6 +470,7 @@ router.get("/customer", auth, (req, res) => {
   checkAggregateUserExists(aggregate_user_id, aggregate_company_id, function (
     userExistence
   ) {
+    console.log(userExistence);
     if (userExistence[0] == false) {
       return res
         .status(400)
@@ -672,8 +669,22 @@ router.get("/item/:item_id", auth, (req, res) => {
 
 // @DESCRIPTION: This Route Is Used To Create Job By The Customer
 // @headers: x_auth_token,
-// @body:job_name,aggregate_company_id,sales_manager_id,customer_site_id,item_id,total_quantity,
-// @body daily_minimum,interval_between_delivery,price_criteria,from_date,to_date,shifts,additional_notes,
+// @body:
+// job_name,
+// aggregate_company_id,
+// sales_manager_id,
+// customer_site_id,
+// item_id,
+// total_quantity,
+
+// daily_minimum,
+// interval_between_delivery,
+// price_criteria,
+// from_date,
+// to_date,
+// shifts,
+// additional_notes,
+
 router.post("/job", auth, (req, res) => {
   let sales_manager_id = req.user.userId;
   let {
