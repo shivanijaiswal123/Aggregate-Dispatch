@@ -24,7 +24,7 @@ app.use(express.json());
 // CORS package
 app.use(
   cors({
-    origin: "https://aggregate-dispatch.herokuapp.com/",
+    origin: "http://localhost:3000",
     credentials: true,
   })
 );
