@@ -193,6 +193,10 @@ router.post("/member", auth, (req, res) => {
               aggregate_company_id: company_id,
             },
             function (err, userResults) {
+              console.log(
+                "---------------------------------------------------------"
+              );
+              console.log(userResults);
               if (err) {
                 return res
                   .status(400)
@@ -313,6 +317,7 @@ router.post("/quarry", auth, (req, res) => {
             city,
             pincode,
             state,
+
             function (quarryInserted) {
               if (quarryInserted[0] == false) {
                 return res
@@ -461,11 +466,64 @@ router.get("/quarry", auth, (req, res) => {
   });
 });
 
+// router.post("/customer", (req, res) => {
+//   // let userId = req.user.userId;
+//   let userId = 23;
+//   let company_id1 = req.body.aggregate_company_id;
+
+//   console.log(userId, company_id1);
+
+//   // Validate that user can perform this function
+//   select_admin =
+//     "SELECT * FROM aggregate_user WHERE aggregate_user_id = ? AND role = ? AND aggregate_company_id = ?";
+
+//   db.query(select_admin, [userId, "Admin", company_id1], function (
+//     err,
+//     results
+//   ) {
+//     console.log(results);
+//   });
+// });
+// router.post("/customer", (req, res) => {
+//   // let userId = req.user.userId;
+
+//   var generateHash = function (password) {
+//     return bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
+//   };
+//   var name = req.body.name;
+//   var email = req.body.email;
+//   var address_line_1 = req.body.address_line_1;
+//   var address_line_2 = req.body.address_line_2;
+//   var password = generateHash("12345");
+//   var city = req.body.city;
+//   var pincode = req.body.pincode;
+//   var state = req.body.state;
+
+//   add_customer = "INSERT INTO customer SET ?";
+//   // Add aggregate_customer
+//   db.query(
+//     add_customer,
+//     {
+//       name,
+//       email,
+//       address_line_1,
+//       address_line_2,
+//       password,
+//       city,
+//       pincode,
+//       state,
+//     },
+//     function (err, userResults) {
+//       console.log(userResults);
+//     }
+//   );
+// });
+
 // @DESCRIPTION: This Route Is Used To Get All Customers
 // @headers: x_auth_token , @body: aggregate_company_id
 router.get("/customer", auth, (req, res) => {
   let aggregate_user_id = req.user.userId;
-  let aggregate_company_id = req.body.aggregate_company_id;
+  let aggregate_company_id = req.query.aggregate_company_id;
 
   checkAggregateUserExists(aggregate_user_id, aggregate_company_id, function (
     userExistence

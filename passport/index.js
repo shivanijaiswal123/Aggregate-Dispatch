@@ -189,6 +189,8 @@ module.exports = function (passport) {
                       if (err) {
                         return done(err);
                       } else {
+                        console.log(result[0]);
+                        console.log(token);
                         return done(
                           null,
                           result[0],
