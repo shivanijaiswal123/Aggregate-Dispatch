@@ -22,13 +22,7 @@ const app = express();
 app.use(express.json());
 
 // CORS package
-app.use(
-  cors({
-    origin:
-      "https://5f75ff874be864735a277322--jovial-bhaskara-3e555a.netlify.app/",
-    credentials: true,
-  })
-);
+app.use(cors());
 app.use(bodyParser.json());
 app.use(flash());
 // Passport initialization
