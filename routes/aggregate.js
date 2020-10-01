@@ -161,6 +161,7 @@ router.post("/member", auth, (req, res) => {
       // Check if member already exists
       select_member = "SELECT * FROM aggregate_user WHERE email=?";
       db.query(select_member, [req.body.email], function (err, memberResults) {
+        // console.log(memberResults);
         if (err) {
           return res
             .status(400)
@@ -181,6 +182,7 @@ router.post("/member", auth, (req, res) => {
           var password = generateHash("12345");
           var company_id = req.body.aggregate_company_id;
           add_user = "INSERT INTO aggregate_user SET ?";
+          console.log(add_user);
           // Add aggregate_user
           db.query(
             add_user,
@@ -193,16 +195,13 @@ router.post("/member", auth, (req, res) => {
               aggregate_company_id: company_id,
             },
             function (err, userResults) {
-              console.log(
-                "---------------------------------------------------------"
-              );
-              console.log(userResults);
               if (err) {
                 return res
                   .status(400)
                   .json({ success: false, message: "Unknown Server Error" });
               } else {
                 let jwtKey = config.get("jwtSecret");
+
                 jwt.sign(
                   { userId: userResults.insertId },
                   jwtKey,
@@ -466,64 +465,101 @@ router.get("/quarry", auth, (req, res) => {
   });
 });
 
-// router.post("/customer", (req, res) => {
-//   // let userId = req.user.userId;
-//   let userId = 23;
-//   let company_id1 = req.body.aggregate_company_id;
+router.post("/customer", auth, (req, res) => {
+  // let userId = req.user.userId;
+  let userId = 23;
+  let company_id1 = req.body.aggregate_company_id;
 
-//   console.log(userId, company_id1);
+  console.log(userId, company_id1);
 
-//   // Validate that user can perform this function
-//   select_admin =
-//     "SELECT * FROM aggregate_user WHERE aggregate_user_id = ? AND role = ? AND aggregate_company_id = ?";
+  // Validate that user can perform this function
+  select_admin =
+    "SELECT * FROM aggregate_user WHERE aggregate_user_id = ? AND role = ? AND aggregate_company_id = ?";
 
-//   db.query(select_admin, [userId, "Admin", company_id1], function (
-//     err,
-//     results
-//   ) {
-//     console.log(results);
-//   });
-// });
-// router.post("/customer", (req, res) => {
-//   // let userId = req.user.userId;
+  db.query(select_admin, [userId, "Admin", company_id1], function (
+    err,
+    results
+  ) {
+    // console.log(results);
+    // console.log(err);
+    if (err) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Unknown Server Error" });
+    } else {
+      var generateHash = function (password) {
+        return bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
+      };
+      var name = req.body.name;
+      var email = req.body.email;
+      var address_line_1 = req.body.address_line_1;
+      var address_line_2 = req.body.address_line_2;
+      var password = generateHash("12345");
+      var city = req.body.city;
+      var pincode = req.body.pincode;
+      var state = req.body.state;
+      var customer_id = 3;
 
-//   var generateHash = function (password) {
-//     return bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
-//   };
-//   var name = req.body.name;
-//   var email = req.body.email;
-//   var address_line_1 = req.body.address_line_1;
-//   var address_line_2 = req.body.address_line_2;
-//   var password = generateHash("12345");
-//   var city = req.body.city;
-//   var pincode = req.body.pincode;
-//   var state = req.body.state;
+      add_customer = "INSERT INTO customer SET ?";
 
-//   add_customer = "INSERT INTO customer SET ?";
-//   // Add aggregate_customer
-//   db.query(
-//     add_customer,
-//     {
-//       name,
-//       email,
-//       address_line_1,
-//       address_line_2,
-//       password,
-//       city,
-//       pincode,
-//       state,
-//     },
-//     function (err, userResults) {
-//       console.log(userResults);
-//     }
-//   );
-// });
+      db.query(
+        add_customer,
+        {
+          customer_id,
+          name,
+          email,
+          address_line_1,
+          address_line_2,
+          password,
+          city,
+          pincode,
+          state,
+        },
+        function (err) {
+          if (err) {
+            return res
+              .status(400)
+              .json({ success: false, message: "Unknown Server Error" });
+          } else {
+            let jwtKey = config.get("jwtSecret");
+
+            jwt.sign({ customerId: 3 }, jwtKey, (err, token) => {
+              if (err) {
+              } else {
+                added_customer = `SELECT * FROM customer WHERE ?`;
+                db.query(added_customer, { customer_id: 3 }, function (
+                  err,
+                  rows
+                ) {
+                  if (err) {
+                    console.log(err);
+                    return res.status(400).json({
+                      success: false,
+                      message: "Unknown Server Error",
+                    });
+                  } else {
+                    return res.status(200).json({
+                      success: true,
+                      message: "Member Added",
+                      member: rows[0],
+                    });
+                  }
+                });
+              }
+            });
+          }
+        }
+      );
+    }
+  });
+});
 
 // @DESCRIPTION: This Route Is Used To Get All Customers
 // @headers: x_auth_token , @body: aggregate_company_id
 router.get("/customer", auth, (req, res) => {
   let aggregate_user_id = req.user.userId;
   let aggregate_company_id = req.query.aggregate_company_id;
+  console.log(aggregate_company_id);
 
   checkAggregateUserExists(aggregate_user_id, aggregate_company_id, function (
     userExistence
