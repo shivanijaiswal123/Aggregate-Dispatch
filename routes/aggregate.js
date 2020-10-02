@@ -292,17 +292,19 @@ router.post("/customer", auth, (req, res) => {
     if (validity[0] == false) {
       return res.status(400).json({ success: false, message: validity[1] });
     } else {
-      let {
-        name,
-        email,
-        password,
-        phone_no,
-        address_line_1,
-        address_line_2,
-        city,
-        pincode,
-        state,
-      } = req.body;
+      var generateHash = function (password) {
+        return bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
+      };
+
+      var name = req.body.name;
+      var email = req.body.email;
+      var password = generateHash("12345");
+      var phone_no = req.body.phone_no;
+      var address_line_1 = req.body.address_line_1;
+      var address_line_2 = req.body.address_line_2;
+      var city = req.body.city;
+      var pincode = req.body.pincode;
+      var state = req.body.state;
 
       AddCustomer.addCustomer(
         name,
@@ -315,25 +317,25 @@ router.post("/customer", auth, (req, res) => {
         pincode,
         state,
 
-        function (quarryInserted) {
-          console.log(quarryInserted);
-          if (quarryInserted[0] == false) {
+        function (customerInserted) {
+          console.log(customerInserted);
+          if (customerInserted[0] == false) {
             return res
               .status(400)
-              .json({ success: false, message: quarryInserted[1] });
+              .json({ success: false, message: customerInserted[1] });
           } else {
-            AddCustomer.selectCustomer(quarryInserted[1], function (
-              fetchedQuarry
+            AddCustomer.selectCustomer(customerInserted[1], function (
+              fetchedCustomer
             ) {
-              if (fetchedQuarry[0] == false) {
+              if (fetchedCustomer[0] == false) {
                 return res
                   .status(400)
-                  .json({ success: false, message: fetchedQuarry[1] });
+                  .json({ success: false, message: fetchedCustomer[1] });
               } else {
                 return res.status(200).json({
                   success: true,
-                  message: fetchedQuarry[1],
-                  quarry: fetchedQuarry[2],
+                  message: fetchedCustomer[1],
+                  customer: fetchedCustomer[2],
                 });
               }
             });
