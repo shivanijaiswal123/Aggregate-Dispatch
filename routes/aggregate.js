@@ -625,7 +625,7 @@ router.get("/quarry", auth, (req, res) => {
 // @headers: x_auth_token , @body: aggregate_company_id
 router.get("/customer", auth, (req, res) => {
   let aggregate_user_id = req.user.userId;
-  let aggregate_company_id = req.query.aggregate_company_id;
+  let aggregate_company_id = req.user.aggregate_company_id;
   console.log(aggregate_company_id);
 
   checkAggregateUserExists(aggregate_user_id, aggregate_company_id, function (
