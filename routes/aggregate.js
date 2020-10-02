@@ -41,6 +41,8 @@ const {
   fetchManagerQuarries,
 } = require("../db_functions/quarry");
 
+const AddCustomer = require("../db_functions/customer");
+
 const {
   getCustomerSiteByCustomerId,
   getCustomerSitesByCustomerId,
@@ -279,6 +281,69 @@ router.get("/member", auth, (req, res) => {
   });
 });
 
+router.post("/customer", auth, (req, res) => {
+  let userId = req.user.userId;
+  let company_id1 = req.query.aggregate_company_id;
+  // console.log(userId);
+  // console.log(company_id1);
+
+  checkAggregateAdmin(userId, company_id1, function (validity) {
+    console.log(validity);
+    if (validity[0] == false) {
+      return res.status(400).json({ success: false, message: validity[1] });
+    } else {
+      let {
+        name,
+        email,
+        password,
+        phone_no,
+        address_line_1,
+        address_line_2,
+        city,
+        pincode,
+        state,
+      } = req.body;
+
+      AddCustomer.addCustomer(
+        name,
+        email,
+        password,
+        phone_no,
+        address_line_1,
+        address_line_2,
+        city,
+        pincode,
+        state,
+
+        function (quarryInserted) {
+          console.log(quarryInserted);
+          if (quarryInserted[0] == false) {
+            return res
+              .status(400)
+              .json({ success: false, message: quarryInserted[1] });
+          } else {
+            AddCustomer.selectCustomer(quarryInserted[1], function (
+              fetchedQuarry
+            ) {
+              if (fetchedQuarry[0] == false) {
+                return res
+                  .status(400)
+                  .json({ success: false, message: fetchedQuarry[1] });
+              } else {
+                return res.status(200).json({
+                  success: true,
+                  message: fetchedQuarry[1],
+                  quarry: fetchedQuarry[2],
+                });
+              }
+            });
+          }
+        }
+      );
+    }
+  });
+});
+
 // @DESCRIPTION: This Route Is Used To Add A Quarry To The Aggregate Company By The Admin
 // @headers: x_auth_token, @body: aggregate_company_id,name,address_line_1,address_line_2,city,pincode,state
 router.post("/quarry", auth, (req, res) => {
@@ -465,94 +530,94 @@ router.get("/quarry", auth, (req, res) => {
   });
 });
 
-router.post("/customer", auth, (req, res) => {
-  // let userId = req.user.userId;
-  let userId = 23;
-  let company_id1 = req.body.aggregate_company_id;
+// router.post("/customer", auth, (req, res) => {
+//   // let userId = req.user.userId;
+//   let userId = 23;
+//   let company_id1 = req.body.aggregate_company_id;
 
-  console.log(userId, company_id1);
+//   console.log(userId, company_id1);
 
-  // Validate that user can perform this function
-  select_admin =
-    "SELECT * FROM aggregate_user WHERE aggregate_user_id = ? AND role = ? AND aggregate_company_id = ?";
+//   // Validate that user can perform this function
+//   select_admin =
+//     "SELECT * FROM aggregate_user WHERE aggregate_user_id = ? AND role = ? AND aggregate_company_id = ?";
 
-  db.query(select_admin, [userId, "Admin", company_id1], function (
-    err,
-    results
-  ) {
-    // console.log(results);
-    // console.log(err);
-    if (err) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Unknown Server Error" });
-    } else {
-      var generateHash = function (password) {
-        return bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
-      };
-      var name = req.body.name;
-      var email = req.body.email;
-      var address_line_1 = req.body.address_line_1;
-      var address_line_2 = req.body.address_line_2;
-      var password = generateHash("12345");
-      var city = req.body.city;
-      var pincode = req.body.pincode;
-      var state = req.body.state;
-      var customer_id = 3;
+//   db.query(select_admin, [userId, "Admin", company_id1], function (
+//     err,
+//     results
+//   ) {
+//     // console.log(results);
+//     // console.log(err);
+//     if (err) {
+//       return res
+//         .status(400)
+//         .json({ success: false, message: "Unknown Server Error" });
+//     } else {
+//       var generateHash = function (password) {
+//         return bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
+//       };
+//       var name = req.body.name;
+//       var email = req.body.email;
+//       var address_line_1 = req.body.address_line_1;
+//       var address_line_2 = req.body.address_line_2;
+//       var password = generateHash("12345");
+//       var city = req.body.city;
+//       var pincode = req.body.pincode;
+//       var state = req.body.state;
+//       var customer_id = 3;
 
-      add_customer = "INSERT INTO customer SET ?";
+//       add_customer = "INSERT INTO customer SET ?";
 
-      db.query(
-        add_customer,
-        {
-          customer_id,
-          name,
-          email,
-          address_line_1,
-          address_line_2,
-          password,
-          city,
-          pincode,
-          state,
-        },
-        function (err) {
-          if (err) {
-            return res
-              .status(400)
-              .json({ success: false, message: "Unknown Server Error" });
-          } else {
-            let jwtKey = config.get("jwtSecret");
+//       db.query(
+//         add_customer,
+//         {
+//           customer_id,
+//           name,
+//           email,
+//           address_line_1,
+//           address_line_2,
+//           password,
+//           city,
+//           pincode,
+//           state,
+//         },
+//         function (err) {
+//           if (err) {
+//             return res
+//               .status(400)
+//               .json({ success: false, message: "Unknown Server Error" });
+//           } else {
+//             let jwtKey = config.get("jwtSecret");
 
-            jwt.sign({ customerId: 3 }, jwtKey, (err, token) => {
-              if (err) {
-              } else {
-                added_customer = `SELECT * FROM customer WHERE ?`;
-                db.query(added_customer, { customer_id: 3 }, function (
-                  err,
-                  rows
-                ) {
-                  if (err) {
-                    console.log(err);
-                    return res.status(400).json({
-                      success: false,
-                      message: "Unknown Server Error",
-                    });
-                  } else {
-                    return res.status(200).json({
-                      success: true,
-                      message: "Member Added",
-                      member: rows[0],
-                    });
-                  }
-                });
-              }
-            });
-          }
-        }
-      );
-    }
-  });
-});
+//             jwt.sign({ customerId: 3 }, jwtKey, (err, token) => {
+//               if (err) {
+//               } else {
+//                 added_customer = `SELECT * FROM customer WHERE ?`;
+//                 db.query(added_customer, { customer_id: 3 }, function (
+//                   err,
+//                   rows
+//                 ) {
+//                   if (err) {
+//                     console.log(err);
+//                     return res.status(400).json({
+//                       success: false,
+//                       message: "Unknown Server Error",
+//                     });
+//                   } else {
+//                     return res.status(200).json({
+//                       success: true,
+//                       message: "Member Added",
+//                       member: rows[0],
+//                     });
+//                   }
+//                 });
+//               }
+//             });
+//           }
+//         }
+//       );
+//     }
+//   });
+// });
 
 // @DESCRIPTION: This Route Is Used To Get All Customers
 // @headers: x_auth_token , @body: aggregate_company_id
