@@ -43,6 +43,7 @@ const {
 
 const AddCustomer = require("../db_functions/customer");
 const AddColor = require("../db_functions/addColor.js");
+const AddPrice = require("../db_functions/addPrice.js");
 
 const {
   getCustomerSiteByCustomerId,
@@ -112,6 +113,36 @@ router.post("/addColor", auth, (req, res) => {
         .json({ success: false, message: colorInserted[1] });
     } else {
       AddColor.selectColor(colorInserted[1], function (fetchedColor) {
+        if (fetchedColor[0] == false) {
+          return res
+            .status(400)
+            .json({ success: false, message: fetchedColor[1] });
+        } else {
+          return res.status(200).json({
+            success: true,
+            message: fetchedColor[1],
+            color: fetchedColor[2],
+          });
+        }
+      });
+    }
+  });
+});
+
+router.post("/addPrice", auth, (req, res) => {
+  // var id = req.body.id;
+  var color = req.body.color;
+  var size = req.body.size;
+  var price = req.body.price;
+
+  AddPrice.addPrice(color, size, price, function (priceInserted) {
+    console.log(priceInserted);
+    if (priceInserted[0] == false) {
+      return res
+        .status(400)
+        .json({ success: false, message: priceInserted[1] });
+    } else {
+      AddPrice.selectPrice(priceInserted[1], function (fetchedColor) {
         if (fetchedColor[0] == false) {
           return res
             .status(400)
