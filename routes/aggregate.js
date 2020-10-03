@@ -42,6 +42,7 @@ const {
 } = require("../db_functions/quarry");
 
 const AddCustomer = require("../db_functions/customer");
+const AddColor = require("../db_functions/addColor.js");
 
 const {
   getCustomerSiteByCustomerId,
@@ -96,6 +97,35 @@ router.get("/signupfailure", (req, res) => {
 
 router.get("/signinfailure", (req, res) => {
   res.status(400).json({ success: false, message: req.flash("message")[0] });
+});
+
+router.post("/addColor", auth, (req, res) => {
+  var color_id = req.body.color_id;
+  var color_name = req.body.color_name;
+  var image = req.body.image;
+
+  AddColor.addColor(color_id, color_name, image, function (colorInserted) {
+    console.log(colorInserted);
+    if (colorInserted[0] == false) {
+      return res
+        .status(400)
+        .json({ success: false, message: colorInserted[1] });
+    } else {
+      AddColor.selectColor(colorInserted[1], function (fetchedColor) {
+        if (fetchedColor[0] == false) {
+          return res
+            .status(400)
+            .json({ success: false, message: fetchedColor[1] });
+        } else {
+          return res.status(200).json({
+            success: true,
+            message: fetchedColor[1],
+            color: fetchedColor[2],
+          });
+        }
+      });
+    }
+  });
 });
 
 //sign up
