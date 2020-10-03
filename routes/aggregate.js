@@ -44,6 +44,7 @@ const {
 const AddCustomer = require("../db_functions/customer");
 const AddColor = require("../db_functions/addColor.js");
 const AddPrice = require("../db_functions/addPrice.js");
+const AddSize = require("../db_functions/addSize.js");
 
 const {
   getCustomerSiteByCustomerId,
@@ -100,6 +101,33 @@ router.get("/signinfailure", (req, res) => {
   res.status(400).json({ success: false, message: req.flash("message")[0] });
 });
 
+router.post("/addSize", auth, (req, res) => {
+  // var col = req.body.color_id;
+  var size = req.body.size;
+  var description = req.body.description;
+
+  AddSize.addSize(size, description, function (sizeInserted) {
+    console.log(sizeInserted);
+    if (sizeInserted[0] == false) {
+      return res.status(400).json({ success: false, message: sizeInserted[1] });
+    } else {
+      AddSize.selectSize(sizeInserted[1], function (fetchedSize) {
+        if (fetchedSize[0] == false) {
+          return res
+            .status(400)
+            .json({ success: false, message: fetchedSize[1] });
+        } else {
+          return res.status(200).json({
+            success: true,
+            message: fetchedSize[1],
+            color: fetchedSize[2],
+          });
+        }
+      });
+    }
+  });
+});
+
 router.post("/addColor", auth, (req, res) => {
   var color_id = req.body.color_id;
   var color_name = req.body.color_name;
@@ -142,16 +170,16 @@ router.post("/addPrice", auth, (req, res) => {
         .status(400)
         .json({ success: false, message: priceInserted[1] });
     } else {
-      AddPrice.selectPrice(priceInserted[1], function (fetchedColor) {
-        if (fetchedColor[0] == false) {
+      AddPrice.selectPrice(priceInserted[1], function (fetchedPrice) {
+        if (fetchedPrice[0] == false) {
           return res
             .status(400)
-            .json({ success: false, message: fetchedColor[1] });
+            .json({ success: false, message: fetchedPrice[1] });
         } else {
           return res.status(200).json({
             success: true,
-            message: fetchedColor[1],
-            color: fetchedColor[2],
+            message: fetchedPrice[1],
+            color: fetchedPrice[2],
           });
         }
       });
