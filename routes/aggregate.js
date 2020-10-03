@@ -42,9 +42,18 @@ const {
 } = require("../db_functions/quarry");
 
 const AddCustomer = require("../db_functions/customer");
-const AddColor = require("../db_functions/addColor.js");
-const AddPrice = require("../db_functions/addPrice.js");
-const AddSize = require("../db_functions/addSize.js");
+const {
+  addColor,
+  selectColor,
+  getColors,
+} = require("../db_functions/addColor.js");
+const {
+  addPrice,
+  selectPrice,
+  getPrices,
+} = require("../db_functions/addPrice.js");
+
+const { addSize, selectSize, getSizes } = require("../db_functions/addSize.js");
 
 const {
   getCustomerSiteByCustomerId,
@@ -99,92 +108,6 @@ router.get("/signupfailure", (req, res) => {
 
 router.get("/signinfailure", (req, res) => {
   res.status(400).json({ success: false, message: req.flash("message")[0] });
-});
-
-router.post("/addSize", auth, (req, res) => {
-  // var col = req.body.color_id;
-  var size = req.body.size;
-  var description = req.body.description;
-
-  AddSize.addSize(size, description, function (sizeInserted) {
-    console.log(sizeInserted);
-    if (sizeInserted[0] == false) {
-      return res.status(400).json({ success: false, message: sizeInserted[1] });
-    } else {
-      AddSize.selectSize(sizeInserted[1], function (fetchedSize) {
-        if (fetchedSize[0] == false) {
-          return res
-            .status(400)
-            .json({ success: false, message: fetchedSize[1] });
-        } else {
-          return res.status(200).json({
-            success: true,
-            message: fetchedSize[1],
-            color: fetchedSize[2],
-          });
-        }
-      });
-    }
-  });
-});
-
-router.post("/addColor", auth, (req, res) => {
-  var color_id = req.body.color_id;
-  var color_name = req.body.color_name;
-  var image = req.body.image;
-
-  AddColor.addColor(color_id, color_name, image, function (colorInserted) {
-    console.log(colorInserted);
-    if (colorInserted[0] == false) {
-      return res
-        .status(400)
-        .json({ success: false, message: colorInserted[1] });
-    } else {
-      AddColor.selectColor(colorInserted[1], function (fetchedColor) {
-        if (fetchedColor[0] == false) {
-          return res
-            .status(400)
-            .json({ success: false, message: fetchedColor[1] });
-        } else {
-          return res.status(200).json({
-            success: true,
-            message: fetchedColor[1],
-            color: fetchedColor[2],
-          });
-        }
-      });
-    }
-  });
-});
-
-router.post("/addPrice", auth, (req, res) => {
-  // var id = req.body.id;
-  var color = req.body.color;
-  var size = req.body.size;
-  var price = req.body.price;
-
-  AddPrice.addPrice(color, size, price, function (priceInserted) {
-    console.log(priceInserted);
-    if (priceInserted[0] == false) {
-      return res
-        .status(400)
-        .json({ success: false, message: priceInserted[1] });
-    } else {
-      AddPrice.selectPrice(priceInserted[1], function (fetchedPrice) {
-        if (fetchedPrice[0] == false) {
-          return res
-            .status(400)
-            .json({ success: false, message: fetchedPrice[1] });
-        } else {
-          return res.status(200).json({
-            success: true,
-            message: fetchedPrice[1],
-            color: fetchedPrice[2],
-          });
-        }
-      });
-    }
-  });
 });
 
 //sign up
@@ -366,71 +289,6 @@ router.get("/member", auth, (req, res) => {
           });
         }
       });
-    }
-  });
-});
-
-router.post("/customer", auth, (req, res) => {
-  let userId = req.user.userId;
-  let company_id1 = req.query.aggregate_company_id;
-  // console.log(userId);
-  // console.log(company_id1);
-
-  checkAggregateAdmin(userId, company_id1, function (validity) {
-    console.log(validity);
-    if (validity[0] == false) {
-      return res.status(400).json({ success: false, message: validity[1] });
-    } else {
-      var generateHash = function (password) {
-        return bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
-      };
-
-      var name = req.body.name;
-      var email = req.body.email;
-      var password = generateHash("12345");
-      var phone_no = req.body.phone_no;
-      var address_line_1 = req.body.address_line_1;
-      var address_line_2 = req.body.address_line_2;
-      var city = req.body.city;
-      var pincode = req.body.pincode;
-      var state = req.body.state;
-
-      AddCustomer.addCustomer(
-        name,
-        email,
-        password,
-        phone_no,
-        address_line_1,
-        address_line_2,
-        city,
-        pincode,
-        state,
-
-        function (customerInserted) {
-          console.log(customerInserted);
-          if (customerInserted[0] == false) {
-            return res
-              .status(400)
-              .json({ success: false, message: customerInserted[1] });
-          } else {
-            AddCustomer.selectCustomer(customerInserted[1], function (
-              fetchedCustomer
-            ) {
-              if (fetchedCustomer[0] == false) {
-                return res
-                  .status(400)
-                  .json({ success: false, message: fetchedCustomer[1] });
-              } else {
-                return res.status(200).json({
-                  success: true,
-                  message: fetchedCustomer[1],
-                  customer: fetchedCustomer[2],
-                });
-              }
-            });
-          }
-        }
-      );
     }
   });
 });
@@ -621,94 +479,200 @@ router.get("/quarry", auth, (req, res) => {
   });
 });
 
-// router.post("/customer", auth, (req, res) => {
-//   // let userId = req.user.userId;
-//   let userId = 23;
-//   let company_id1 = req.body.aggregate_company_id;
+router.get("/color", auth, (req, res) => {
+  getColors(function (fetchedColors) {
+    if (fetchedColors[0] == false) {
+      return res
+        .status(400)
+        .json({ success: false, message: fetchedColors[1] });
+    } else {
+      return res.status(200).json({
+        success: true,
+        message: fetchedColors[1],
+        customers: fetchedColors[2],
+      });
+    }
+  });
+});
+router.post("/addColor", auth, (req, res) => {
+  var color_id = req.body.color_id;
+  var color_name = req.body.color_name;
+  var image = req.body.image;
 
-//   console.log(userId, company_id1);
+  AddColor.addColor(color_id, color_name, image, function (colorInserted) {
+    console.log(colorInserted);
+    if (colorInserted[0] == false) {
+      return res
+        .status(400)
+        .json({ success: false, message: colorInserted[1] });
+    } else {
+      AddColor.selectColor(colorInserted[1], function (fetchedColor) {
+        if (fetchedColor[0] == false) {
+          return res
+            .status(400)
+            .json({ success: false, message: fetchedColor[1] });
+        } else {
+          return res.status(200).json({
+            success: true,
+            message: fetchedColor[1],
+            color: fetchedColor[2],
+          });
+        }
+      });
+    }
+  });
+});
+router.get("/price", auth, (req, res) => {
+  getPrices(function (fetchedPrices) {
+    if (fetchedPrices[0] == false) {
+      return res
+        .status(400)
+        .json({ success: false, message: fetchedPrices[1] });
+    } else {
+      return res.status(200).json({
+        success: true,
+        message: fetchedPrices[1],
+        customers: fetchedPrices[2],
+      });
+    }
+  });
+});
 
-//   // Validate that user can perform this function
-//   select_admin =
-//     "SELECT * FROM aggregate_user WHERE aggregate_user_id = ? AND role = ? AND aggregate_company_id = ?";
+router.post("/addPrice", auth, (req, res) => {
+  // var id = req.body.id;
+  var color = req.body.color;
+  var size = req.body.size;
+  var price = req.body.price;
 
-//   db.query(select_admin, [userId, "Admin", company_id1], function (
-//     err,
-//     results
-//   ) {
-//     // console.log(results);
-//     // console.log(err);
-//     if (err) {
-//       return res
-//         .status(400)
-//         .json({ success: false, message: "Unknown Server Error" });
-//     } else {
-//       var generateHash = function (password) {
-//         return bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
-//       };
-//       var name = req.body.name;
-//       var email = req.body.email;
-//       var address_line_1 = req.body.address_line_1;
-//       var address_line_2 = req.body.address_line_2;
-//       var password = generateHash("12345");
-//       var city = req.body.city;
-//       var pincode = req.body.pincode;
-//       var state = req.body.state;
-//       var customer_id = 3;
+  addPrice(color, size, price, function (priceInserted) {
+    console.log(priceInserted);
+    if (priceInserted[0] == false) {
+      return res
+        .status(400)
+        .json({ success: false, message: priceInserted[1] });
+    } else {
+      selectPrice(priceInserted[1], function (fetchedPrice) {
+        if (fetchedPrice[0] == false) {
+          return res
+            .status(400)
+            .json({ success: false, message: fetchedPrice[1] });
+        } else {
+          return res.status(200).json({
+            success: true,
+            message: fetchedPrice[1],
+            color: fetchedPrice[2],
+          });
+        }
+      });
+    }
+  });
+});
 
-//       add_customer = "INSERT INTO customer SET ?";
+router.get("/size", auth, (req, res) => {
+  getSizes(function (fetchedSizes) {
+    if (fetchedSizes[0] == false) {
+      return res.status(400).json({ success: false, message: fetchedSizes[1] });
+    } else {
+      return res.status(200).json({
+        success: true,
+        message: fetchedSizes[1],
+        customers: fetchedSizes[2],
+      });
+    }
+  });
+});
 
-//       db.query(
-//         add_customer,
-//         {
-//           customer_id,
-//           name,
-//           email,
-//           address_line_1,
-//           address_line_2,
-//           password,
-//           city,
-//           pincode,
-//           state,
-//         },
-//         function (err) {
-//           if (err) {
-//             return res
-//               .status(400)
-//               .json({ success: false, message: "Unknown Server Error" });
-//           } else {
-//             let jwtKey = config.get("jwtSecret");
+router.post("/addSize", auth, (req, res) => {
+  // var col = req.body.color_id;
+  var size = req.body.size;
+  var description = req.body.description;
 
-//             jwt.sign({ customerId: 3 }, jwtKey, (err, token) => {
-//               if (err) {
-//               } else {
-//                 added_customer = `SELECT * FROM customer WHERE ?`;
-//                 db.query(added_customer, { customer_id: 3 }, function (
-//                   err,
-//                   rows
-//                 ) {
-//                   if (err) {
-//                     console.log(err);
-//                     return res.status(400).json({
-//                       success: false,
-//                       message: "Unknown Server Error",
-//                     });
-//                   } else {
-//                     return res.status(200).json({
-//                       success: true,
-//                       message: "Member Added",
-//                       member: rows[0],
-//                     });
-//                   }
-//                 });
-//               }
-//             });
-//           }
-//         }
-//       );
-//     }
-//   });
-// });
+  addSize(size, description, function (sizeInserted) {
+    console.log(sizeInserted);
+    if (sizeInserted[0] == false) {
+      return res.status(400).json({ success: false, message: sizeInserted[1] });
+    } else {
+      selectSize(sizeInserted[1], function (fetchedSize) {
+        if (fetchedSize[0] == false) {
+          return res
+            .status(400)
+            .json({ success: false, message: fetchedSize[1] });
+        } else {
+          return res.status(200).json({
+            success: true,
+            message: fetchedSize[1],
+            color: fetchedSize[2],
+          });
+        }
+      });
+    }
+  });
+});
+
+router.post("/customer", auth, (req, res) => {
+  let userId = req.user.userId;
+  let company_id1 = req.query.aggregate_company_id;
+  // console.log(userId);
+  // console.log(company_id1);
+
+  checkAggregateAdmin(userId, company_id1, function (validity) {
+    console.log(validity);
+    if (validity[0] == false) {
+      return res.status(400).json({ success: false, message: validity[1] });
+    } else {
+      var generateHash = function (password) {
+        return bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
+      };
+
+      var name = req.body.name;
+      var email = req.body.email;
+      var password = generateHash("12345");
+      var phone_no = req.body.phone_no;
+      var address_line_1 = req.body.address_line_1;
+      var address_line_2 = req.body.address_line_2;
+      var city = req.body.city;
+      var pincode = req.body.pincode;
+      var state = req.body.state;
+
+      AddCustomer.addCustomer(
+        name,
+        email,
+        password,
+        phone_no,
+        address_line_1,
+        address_line_2,
+        city,
+        pincode,
+        state,
+
+        function (customerInserted) {
+          console.log(customerInserted);
+          if (customerInserted[0] == false) {
+            return res
+              .status(400)
+              .json({ success: false, message: customerInserted[1] });
+          } else {
+            AddCustomer.selectCustomer(customerInserted[1], function (
+              fetchedCustomer
+            ) {
+              if (fetchedCustomer[0] == false) {
+                return res
+                  .status(400)
+                  .json({ success: false, message: fetchedCustomer[1] });
+              } else {
+                return res.status(200).json({
+                  success: true,
+                  message: fetchedCustomer[1],
+                  customer: fetchedCustomer[2],
+                });
+              }
+            });
+          }
+        }
+      );
+    }
+  });
+});
 
 // @DESCRIPTION: This Route Is Used To Get All Customers
 // @headers: x_auth_token , @body: aggregate_company_id

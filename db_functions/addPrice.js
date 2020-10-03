@@ -35,4 +35,15 @@ const selectPrice = (id, callback) => {
   });
 };
 
-module.exports = { addPrice, selectPrice };
+const getPrices = (callback) => {
+  get_prices = `SELECT * FROM price`;
+  db.query(get_prices, function (err, results) {
+    if (err) {
+      callback([false, "Unknown Server Error"]);
+    } else {
+      callback([true, "Prices Fetched", results]);
+    }
+  });
+};
+
+module.exports = { addPrice, selectPrice, getPrices };

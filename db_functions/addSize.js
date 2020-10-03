@@ -34,4 +34,15 @@ const selectSize = (id, callback) => {
   });
 };
 
-module.exports = { addSize, selectSize };
+const getSizes = (callback) => {
+  get_sizes = `SELECT * FROM size`;
+  db.query(get_sizes, function (err, results) {
+    if (err) {
+      callback([false, "Unknown Server Error"]);
+    } else {
+      callback([true, "Sizes Fetched", results]);
+    }
+  });
+};
+
+module.exports = { addSize, selectSize, getSizes };

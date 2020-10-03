@@ -1,6 +1,6 @@
 var db = require("../dbSetup");
 
-const addColor = (color_id, color_name, image, callback) => {
+const addColor = (color_name, image, callback) => {
   add_color = `INSERT INTO color SET ?`;
   db.query(
     add_color,
@@ -34,4 +34,15 @@ const selectColor = (color_id, callback) => {
   });
 };
 
-module.exports = { addColor, selectColor };
+const getColors = (callback) => {
+  get_colors = `SELECT * FROM color`;
+  db.query(get_colors, function (err, results) {
+    if (err) {
+      callback([false, "Unknown Server Error"]);
+    } else {
+      callback([true, "Colors Fetched", results]);
+    }
+  });
+};
+
+module.exports = { addColor, selectColor, getColors };
