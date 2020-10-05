@@ -153,7 +153,7 @@ router.post(
 
 router.post("/member", auth, (req, res) => {
   let userId = req.user.userId;
-  let company_id1 = req.body.aggregate_company_id;
+  let company_id1 = req.query.aggregate_company_id;
 
   console.log(userId, company_id1);
 
