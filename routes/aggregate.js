@@ -263,7 +263,7 @@ router.post("/member", auth, (req, res) => {
 // @headers: x_auth_token, @body: aggregate_company_id
 router.get("/member", auth, (req, res) => {
   let userId = req.user.userId;
-  let company_id1 = req.body.aggregate_company_id;
+  let company_id1 = req.query.aggregate_company_id;
   console.log(userId);
   console.log(company_id1);
 
@@ -494,6 +494,7 @@ router.get("/color", auth, (req, res) => {
     }
   });
 });
+
 router.post("/addColor", auth, (req, res) => {
   var color_id = req.body.color_id;
   var color_name = req.body.color_name;
@@ -522,6 +523,7 @@ router.post("/addColor", auth, (req, res) => {
     }
   });
 });
+
 router.get("/price", auth, (req, res) => {
   getPrices(function (fetchedPrices) {
     if (fetchedPrices[0] == false) {
