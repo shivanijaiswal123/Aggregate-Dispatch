@@ -169,7 +169,7 @@ router.post("/permission", auth, (req, res) => {
         .status(400)
         .json({ success: false, message: queryInserted[1] });
     } else {
-      selectPermission(queryInserted[1], function (fetchedQuery) {
+      selectPermission-(queryInserted[1], function (fetchedQuery) {
         if (fetchedQuery[0] == false) {
           return res
             .status(400)
