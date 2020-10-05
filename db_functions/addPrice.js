@@ -28,7 +28,7 @@ const selectPrice = (id, callback) => {
     if (err) {
       callback([false, "Unknown Server Error"]);
     } else if (results[0]) {
-      callback([true, "color Fetched", results[0]]);
+      callback([true, "price Fetched", results[0]]);
     } else {
       callback([false, "Unable To Fetch color"]);
     }

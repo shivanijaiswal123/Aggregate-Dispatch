@@ -54,6 +54,11 @@ const {
 } = require("../db_functions/addPrice.js");
 
 const { addSize, selectSize, getSizes } = require("../db_functions/addSize.js");
+const {
+  addPermission,
+  selectPermission,
+  getPermissions,
+} = require("../db_functions/user_permissions.js");
 
 const {
   getCustomerSiteByCustomerId,
@@ -147,6 +152,39 @@ router.post(
     });
   }
 );
+
+router.post("/permission", auth, (req, res) => {
+  // var id = req.body.id;
+  var role_name = req.body.role_name;
+  var edit_user = req.body.edit_user;
+  var view_user = req.body.view_user;
+  var add_user = req.body.add_user;
+
+  addPermission(role_name, edit_user, view_user, add_user, function (
+    queryInserted
+  ) {
+    console.log(queryInserted);
+    if (queryInserted[0] == false) {
+      return res
+        .status(400)
+        .json({ success: false, message: queryInserted[1] });
+    } else {
+      selectPermission(queryInserted[1], function (fetchedQuery) {
+        if (fetchedQuery[0] == false) {
+          return res
+            .status(400)
+            .json({ success: false, message: fetchedQuery[1] });
+        } else {
+          return res.status(200).json({
+            success: true,
+            message: fetchedQuery[1],
+            permissions: fetchedQuery[2],
+          });
+        }
+      });
+    }
+  });
+});
 
 // @DESCRIPTION: This Route Is Used To Add A Member To The Aggregate Company By The Admin
 // @headers: x_auth_token, @body: aggregate_company_id,email,name,user_role,phone_no
