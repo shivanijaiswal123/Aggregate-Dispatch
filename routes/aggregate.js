@@ -154,6 +154,22 @@ router.post(
   }
 );
 
+router.get("/permission", auth, (req, res) => {
+  getPermissions(function (fetchedPermissions) {
+    if (fetchedPermissions[0] == false) {
+      return res
+        .status(400)
+        .json({ success: false, message: fetchedPermissions[1] });
+    } else {
+      return res.status(200).json({
+        success: true,
+        message: fetchedPermissions[1],
+        Permissions: fetchedPermissions[2],
+      });
+    }
+  });
+});
+
 router.post("/permission", auth, (req, res) => {
   // var id = req.body.id;
   var role_name = req.body.role_name;
@@ -686,14 +702,14 @@ router.post("/addColor", auth, (req, res) => {
   var color_name = req.body.color_name;
   var image = req.body.image;
 
-  AddColor.addColor(color_id, color_name, image, function (colorInserted) {
+  addColor(color_id, color_name, image, function (colorInserted) {
     console.log(colorInserted);
     if (colorInserted[0] == false) {
       return res
         .status(400)
         .json({ success: false, message: colorInserted[1] });
     } else {
-      AddColor.selectColor(colorInserted[1], function (fetchedColor) {
+      selectColor(colorInserted[1], function (fetchedColor) {
         if (fetchedColor[0] == false) {
           return res
             .status(400)
