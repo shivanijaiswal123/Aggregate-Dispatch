@@ -297,6 +297,120 @@ router.post("/member", auth, (req, res) => {
   });
 });
 
+
+router.post("/addUser", auth, (req, res) => {
+  let userId = req.user.userId;
+  let company_id1 = req.query.aggregate_company_id;
+
+  console.log(userId, company_id1);
+
+  // Validate that user can perform this function
+  select_admin =
+    "SELECT * FROM aggregate_user WHERE aggregate_user_id = ? AND role = ? AND aggregate_company_id = ?";
+
+  db.query(select_admin, [userId, "Admin", company_id1], function (
+    err,
+    results
+  ) {
+    if (err) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Unknown Server Error" });
+    }
+    console.log(results);
+    if (results[0]) {
+      // Check if member already exists
+      select_user = "SELECT * FROM user WHERE email=?";
+      db.query(select_user, [req.body.email], function (err, userResults) {
+        // console.log(memberResults);
+        if (err) {
+          return res
+            .status(400)
+            .json({ success: false, message: "Unknown Server Error" });
+        }
+        if (userResults[0]) {
+          return res
+            .status(400)
+            .json({ success: false, message: "This User Already Exists" });
+        } else {
+          var generateHash = function (password) {
+            return bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
+          };
+          var name = req.body.name;
+          var email = req.body.email;
+          var role = req.body.user_role;
+          var phone_no = req.body.phone_no;
+          var password = generateHash("12345");
+          var edit_user = req.body.edit_user;
+          var add_user = req.body.add_user;
+          var view_user = req.body.view_user;
+
+          add = "INSERT INTO user SET ?";
+          console.log(add);
+          // Add aggregate_user
+          db.query(
+            add,
+            {
+              name,
+              email,
+              password,
+              phone_no,
+              role,
+              edit_user,
+              view_user,
+              add_user
+            },
+            function (err, userResults) {
+              if (err) {
+                return res
+                  .status(400)
+                  .json({ success: false, message: "Unknown Server Error" });
+              } else {
+                let jwtKey = config.get("jwtSecret");
+
+                jwt.sign(
+                  { userId: userResults.insertId },
+                  jwtKey,
+                  (err, token) => {
+                    if (err) {
+                    } else {
+                      added_user = `SELECT * FROM user`;
+                      db.query(
+                        added_user,
+              
+                        function (err, rows) {
+                          if (err) {
+                            console.log(err);
+                            return res.status(400).json({
+                              success: false,
+                              message: "Unknown Server Error",
+                            });
+                          } else {
+                            return res.status(200).json({
+                              success: true,
+                              message: "User Added",
+                              member: rows[0],
+                            });
+                          }
+                        }
+                      );
+                    }
+                  }
+                );
+              }
+            }
+          );
+        }
+      });
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "User Not Authenticated To Perfom This Task",
+      });
+    }
+  });
+});
+
 // @DESCRIPTION: This Route Is Used To View Members Of The Aggregate Company By The Admin
 // @headers: x_auth_token, @body: aggregate_company_id
 router.get("/member", auth, (req, res) => {
