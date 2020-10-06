@@ -7,7 +7,7 @@ var conn = mysql.createConnection({
   port: "3306",
   database: "heroku_8050956b50d627d",
   multipleStatements: true,
-});
+// });
 
 // var conn = mysql.createConnection({
 //   host: "localhost",

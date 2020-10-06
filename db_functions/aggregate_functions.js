@@ -81,7 +81,21 @@ const getAllMembers = (aggregate_company_id, callback) => {
   });
 };
 
+const getAllUsers = (callback) => {
+  get_users = `SELECT * FROM user `;
+  db.query(get_users, function (err, results) {
+    if (err) {
+      callback([false, "Unknown Server Error"]);
+    } else if (results.length > 0) {
+      callback([true, "Users Fetched", results]);
+    } else {
+      callback([false, "No Users"]);
+    }
+  });
+};
+
 exports.checkAggregateUserExists = checkAggregateUserExists;
 exports.checkAggregateAdmin = checkAggregateAdmin;
 exports.fetchUserRole = fetchUserRole;
 exports.getAllMembers = getAllMembers;
+exports.getAllUsers = getAllUsers;

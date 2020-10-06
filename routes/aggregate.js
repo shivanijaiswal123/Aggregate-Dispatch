@@ -28,6 +28,7 @@ const {
   checkAggregateAdmin,
   fetchUserRole,
   getAllMembers,
+  getAllUsers,
 } = require("../db_functions/aggregate_functions");
 
 // Quarry - a place, typically a large, deep pit, from which stone or other materials are or have been extracted.
@@ -169,19 +170,21 @@ router.post("/permission", auth, (req, res) => {
         .status(400)
         .json({ success: false, message: queryInserted[1] });
     } else {
-      selectPermission-(queryInserted[1], function (fetchedQuery) {
-        if (fetchedQuery[0] == false) {
-          return res
-            .status(400)
-            .json({ success: false, message: fetchedQuery[1] });
-        } else {
-          return res.status(200).json({
-            success: true,
-            message: fetchedQuery[1],
-            permissions: fetchedQuery[2],
-          });
-        }
-      });
+      selectPermission -
+        (queryInserted[1],
+        function (fetchedQuery) {
+          if (fetchedQuery[0] == false) {
+            return res
+              .status(400)
+              .json({ success: false, message: fetchedQuery[1] });
+          } else {
+            return res.status(200).json({
+              success: true,
+              message: fetchedQuery[1],
+              permissions: fetchedQuery[2],
+            });
+          }
+        });
     }
   });
 });
@@ -297,7 +300,6 @@ router.post("/member", auth, (req, res) => {
   });
 });
 
-
 router.post("/addUser", auth, (req, res) => {
   let userId = req.user.userId;
   let company_id1 = req.query.aggregate_company_id;
@@ -358,7 +360,7 @@ router.post("/addUser", auth, (req, res) => {
               role,
               edit_user,
               view_user,
-              add_user
+              add_user,
             },
             function (err, userResults) {
               if (err) {
@@ -377,7 +379,7 @@ router.post("/addUser", auth, (req, res) => {
                       added_user = `SELECT * FROM user`;
                       db.query(
                         added_user,
-              
+
                         function (err, rows) {
                           if (err) {
                             console.log(err);
@@ -438,6 +440,38 @@ router.get("/member", auth, (req, res) => {
             success: true,
             message: fetchedMembers[1],
             members: fetchedMembers[2],
+          });
+        }
+      });
+    }
+  });
+});
+
+router.get("/users", auth, (req, res) => {
+  let userId = req.user.userId;
+  let company_id1 = req.query.aggregate_company_id;
+  console.log(userId);
+  console.log(company_id1);
+
+  checkAggregateAdmin(userId, company_id1, function (adminValidity) {
+    console.log(adminValidity);
+    adminValidity = true;
+    if (adminValidity[0] == false) {
+      console.log(adminValidity[1]);
+      return res
+        .status(400)
+        .json({ success: false, message: adminValidity[1] });
+    } else {
+      getAllUsers(function (fetchedUsers) {
+        if (fetchedUsers[0] == false) {
+          return res
+            .status(400)
+            .json({ success: false, message: fetchedUsers[1] });
+        } else {
+          return res.status(200).json({
+            success: true,
+            message: fetchedUsers[1],
+            users: fetchedUsers[2],
           });
         }
       });
