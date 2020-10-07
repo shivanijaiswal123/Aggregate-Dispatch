@@ -42,6 +42,11 @@ const {
   fetchManagerQuarries,
 } = require("../db_functions/quarry");
 
+const {
+  assignUser,
+  checkUserById,
+  selectUser,
+} = require("../db_functions/addUser.js");
 const AddCustomer = require("../db_functions/customer");
 const {
   addColor,
@@ -622,6 +627,46 @@ router.put("/quarry/:quarry_id/manager/:manager_id", auth, (req, res) => {
                   message: "Member Needs To Be Quarry Manager",
                 });
               }
+            }
+          });
+        }
+      });
+    }
+  });
+});
+
+router.put("/editUser", auth, (req, res) => {
+  let userId = req.user.userId;
+  let user_id = req.query.user_id;
+  // console.log(user_id)
+
+  checkUserById(user_id, function (user_existence) {
+    // console.log(user_existence);
+    if (user_existence[0] == false) {
+      return res
+        .status(400)
+        .json({ success: false, message: user_existence[1] });
+    } else {
+      assignUser(req.body, user_id, function (updated_user) {
+        console.log(updated_user);
+        if (updated_user[0] == false) {
+          return res
+            .status(400)
+            .json({ success: false, message: updated_user[1] });
+        } else {
+          selectUser(updated_user[1], function (fetchedUser) {
+            // console.log("------------------")
+            // console.log(fetchedUser)
+            if (fetchedUser[0] == false) {
+              return res
+                .status(400)
+                .json({ success: false, message: fetchedUser[1] });
+            } else {
+              return res.status(200).json({
+                success: true,
+                message: fetchedUser[1],
+                user: fetchedUser[2],
+              });
             }
           });
         }
