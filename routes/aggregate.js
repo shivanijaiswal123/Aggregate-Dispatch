@@ -48,6 +48,11 @@ const {
   selectRole,
 } = require("../db_functions/addRole.js");
 
+const {
+  assignCustomer,
+  checkCustomerById,
+  selectCustomer,
+} = require("../db_functions/addCustomer.js");
 
 const {
   assignUser,
@@ -900,6 +905,47 @@ router.post("/addSize", auth, (req, res) => {
             success: true,
             message: fetchedSize[1],
             color: fetchedSize[2],
+          });
+        }
+      });
+    }
+  });
+});
+
+
+router.put("/editCustomer", auth, (req, res) => {
+  // let userId = req.user.userId;
+  let customer_id = req.query.customer_id
+  console.log(customer_id)
+
+  checkCustomerById(customer_id, function (customer_existence) {
+    // console.log(user_existence);
+    if (customer_existence[0] == false) {
+      return res
+        .status(400)
+        .json({ success: false, message: customer_existence[1] });
+    } else {
+      assignCustomer(req.body, customer_id, function (updated_customer) {
+        console.log(updated_customer);
+        if (updated_customer[0] == false) {
+          return res
+            .status(400)
+            .json({ success: false, message: updated_customer[1] });
+        } else {
+          selectCustomer(updated_customer[1], function (fetchedCustomers) {
+            // console.log("------------------")
+            // console.log(fetchedUser)
+            if (fetchedCustomers[0] == false) {
+              return res
+                .status(400)
+                .json({ success: false, message: fetchedCustomers[1] });
+            } else {
+              return res.status(200).json({
+                success: true,
+                message: fetchedCustomers[1],
+                role: fetchedCustomers[2],
+              });
+            }
           });
         }
       });
