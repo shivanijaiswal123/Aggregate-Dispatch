@@ -43,10 +43,19 @@ const {
 } = require("../db_functions/quarry");
 
 const {
+  assignRole,
+  checkRoleById,
+  selectRole,
+} = require("../db_functions/addRole.js");
+
+
+const {
   assignUser,
   checkUserById,
   selectUser,
 } = require("../db_functions/addUser.js");
+
+
 const AddCustomer = require("../db_functions/customer");
 const {
   addColor,
@@ -636,9 +645,9 @@ router.put("/quarry/:quarry_id/manager/:manager_id", auth, (req, res) => {
 });
 
 router.put("/editUser", auth, (req, res) => {
-  let userId = req.user.userId;
+  // let userId = req.user.userId;
   let user_id = req.query.user_id;
-  // console.log(user_id)
+  console.log(user_id)
 
   checkUserById(user_id, function (user_existence) {
     // console.log(user_existence);
@@ -666,6 +675,46 @@ router.put("/editUser", auth, (req, res) => {
                 success: true,
                 message: fetchedUser[1],
                 user: fetchedUser[2],
+              });
+            }
+          });
+        }
+      });
+    }
+  });
+});
+
+router.put("/editRole", auth, (req, res) => {
+  // let userId = req.user.userId;
+  let role_id = req.query.role_id;
+  console.log(role_id)
+
+  checkRoleById(role_id, function (role_existence) {
+    // console.log(user_existence);
+    if (role_existence[0] == false) {
+      return res
+        .status(400)
+        .json({ success: false, message: role_existence[1] });
+    } else {
+      assignRole(req.body, role_id, function (updated_role) {
+        console.log(updated_role);
+        if (updated_role[0] == false) {
+          return res
+            .status(400)
+            .json({ success: false, message: updated_role[1] });
+        } else {
+          selectRole(updated_role[1], function (fetchedRole) {
+            // console.log("------------------")
+            // console.log(fetchedUser)
+            if (fetchedRole[0] == false) {
+              return res
+                .status(400)
+                .json({ success: false, message: fetchedRole[1] });
+            } else {
+              return res.status(200).json({
+                success: true,
+                message: fetchedRole[1],
+                role: fetchedRole[2],
               });
             }
           });

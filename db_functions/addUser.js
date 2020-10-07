@@ -20,33 +20,51 @@ const assignUser = (data, user_id, callback) => {
   //   console.log(data);
   console.log(data.name);
 
-  query = `UPDATE user SET name=?,email=?,password=?,phone_no=?,role=?,add_user=?,view_user=?,edit_user=? WHERE id =?`;
-  db.query(
-    query,
-    [
-      data.name,
-      data.email,
-      data.password,
-      data.phone_no,
-      data.role,
-      data.add_user,
-      data.view_user,
-      data.edit_user,
-      user_id,
-    ],
-    function (err, results) {
-      //   console.log("!!!!!!!!!!!!!!!!!");
-      //   console.log(user_id);
-      //   console.log(data);
-      //   console.log(results);
-      if (err) {
-        callback(err);
-      } else {
-        callback([true, user_id]);
-      }
+  query = `UPDATE user SET ? WHERE id =?`;
+  db.query(query, [data, user_id], function (err, results) {
+    //   console.log("!!!!!!!!!!!!!!!!!");
+    //   console.log(user_id);
+    //   console.log(data);
+    //   console.log(results);
+    if (err) {
+      callback(err);
+    } else {
+      callback([true, user_id]);
     }
-  );
+  });
 };
+
+// const assignUser = (data, user_id, callback) => {
+//   //   console.log(data);
+//   console.log(data.name);
+
+//   query = `UPDATE user SET name=?,email=?,password=?,phone_no=?,role=?,add_user=?,view_user=?,edit_user=? WHERE id =?`;
+//   db.query(
+//     query,
+//     [
+//       data.name,
+//       data.email,
+//       data.password,
+//       data.phone_no,
+//       data.role,
+//       data.add_user,
+//       data.view_user,
+//       data.edit_user,
+//       user_id,
+//     ],
+//     function (err, results) {
+//       //   console.log("!!!!!!!!!!!!!!!!!");
+//       //   console.log(user_id);
+//       //   console.log(data);
+//       //   console.log(results);
+//       if (err) {
+//         callback(err);
+//       } else {
+//         callback([true, user_id]);
+//       }
+//     }
+//   );
+// };
 
 const selectUser = (user_id, callback) => {
   query = `SELECT * FROM user WHERE id=?`;
