@@ -30,6 +30,8 @@ const {
   checkItemExistsById,
   getItems,
   getItem,
+  addItem,
+  selectItem,
 } = require("../db_functions/item");
 const { getShiftsByJobId } = require("../db_functions/shift_functions");
 
@@ -212,6 +214,34 @@ router.get("/item", auth, (req, res) => {
             success: true,
             message: fetchedItems[1],
             items: fetchedItems[2],
+          });
+        }
+      });
+    }
+  });
+});
+
+router.post("/addItem", auth, (req, res) => {
+  // var id = req.body.id;
+  var item_name = req.body.item_name;
+  var item_code = req.body.item_code;
+  var quantity = req.body.quantity;
+
+  addItem(item_name, item_code, quantity, function (itemInserted) {
+    console.log(itemInserted);
+    if (itemInserted[0] == false) {
+      return res.status(400).json({ success: false, message: itemInserted[1] });
+    } else {
+      selectItem(itemInserted[1], function (fetchedItem) {
+        if (fetchedItem[0] == false) {
+          return res
+            .status(400)
+            .json({ success: false, message: fetchedItem[1] });
+        } else {
+          return res.status(200).json({
+            success: true,
+            message: fetchedItem[1],
+            item: fetchedItem[2],
           });
         }
       });

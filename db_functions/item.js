@@ -18,7 +18,7 @@ const checkItemExistsById = (item_id, callback) => {
 // @description: Get All Items
 // @arguments:
 const getItems = (callback) => {
-  get_items = `SELECT * FROM item`;
+  get_items = `SELECT * FROM items`;
   db.query(get_items, function (err, results) {
     if (err) {
       callback([false, "Unknown Servre Error"]);
@@ -43,6 +43,43 @@ const getItem = (item_id, callback) => {
   });
 };
 
+const addItem = (item_name, item_code, quantity, callback) => {
+  add_item = `INSERT INTO items SET ?`;
+  db.query(
+    add_item,
+    {
+      item_name,
+      item_code,
+      quantity,
+    },
+    function (err, results) {
+      if (err) {
+        console.log("------------------------------");
+        console.log(err);
+        callback([false, "Unknown Server Error"]);
+      } else {
+        callback([true, results.insertId]);
+      }
+    }
+  );
+};
+
+const selectItem = (item_id, callback) => {
+  console.log("----");
+  select_item = `SELECT * FROM items WHERE item_id=?`;
+  db.query(select_item, [item_id], function (err, results) {
+    if (err) {
+      callback([false, "Unknown Server Error"]);
+    } else if (results[0]) {
+      callback([true, "items Fetched", results[0]]);
+    } else {
+      callback([false, "Unable To Fetch items"]);
+    }
+  });
+};
+
 exports.checkItemExistsById = checkItemExistsById;
 exports.getItems = getItems;
 exports.getItem = getItem;
+exports.selectItem = selectItem;
+exports.addItem = addItem;

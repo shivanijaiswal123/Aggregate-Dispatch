@@ -67,7 +67,7 @@ router.post(
   }
 );
 
-// @DESCRIPTION: This Route Is Used To Add Trucks By The Admin
+// @DESCRIPTION: This Route Is Used To Add Trucks
 // @headers: x_auth_token, @body: truck_company_id,vehicle_no,number_plate
 router.post("/truck", auth, (req, res) => {
   let userId = req.user.userId;

@@ -1,22 +1,11 @@
-//requird express app and db
 const express = require("express");
 var db = require("../dbSetup");
-
 const router = express.Router();
-
-// The bcrypt library on NPM makes it really easy to hash and compare passwords in Node
 const bcrypt = require("bcryptjs");
-
-// The JSON web token (JWT) is one method for allowing authentication, without actually storing any information about the user on the system itself.
-// In simple terms, authentication is the process of verifying who a user is, while authorization is the process of verifying what they have access to. Initially we will just check token in the header of request for restricted routes, then allow or deny request.
 const jwt = require("jsonwebtoken");
-
-// Passport is authentication middleware for Node. js.
 const passport = require("passport");
 
 const auth = require("../middleware/auth");
-
-// Node-config creates configuration files for application deployments. Node-config allows us to define a set of default parameters
 const config = require("config");
 
 const {
@@ -31,7 +20,6 @@ const {
   getAllUsers,
 } = require("../db_functions/aggregate_functions");
 
-// Quarry - a place, typically a large, deep pit, from which stone or other materials are or have been extracted.
 const {
   checkQuarryExists,
   addQuarry,
@@ -62,11 +50,13 @@ const {
 
 
 const AddCustomer = require("../db_functions/customer");
+
 const {
   addColor,
   selectColor,
   getColors,
 } = require("../db_functions/addColor.js");
+
 const {
   addPrice,
   selectPrice,
@@ -74,6 +64,7 @@ const {
 } = require("../db_functions/addPrice.js");
 
 const { addSize, selectSize, getSizes } = require("../db_functions/addSize.js");
+
 const {
   addPermission,
   selectPermission,
@@ -125,7 +116,7 @@ const {
 
 const { getShiftsByJobId } = require("../db_functions/shift_functions");
 
-const e = require("express");
+// const e = require("express");
 
 router.get("/signupfailure", (req, res) => {
   res.status(400).json({ success: false, message: req.flash("message")[0] });
