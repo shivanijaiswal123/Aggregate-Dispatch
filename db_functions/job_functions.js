@@ -39,10 +39,15 @@ const createJob = (
     },
     function (err, results) {
       if (err) {
+        console.log(err);
         callback([false, "Unknown Server Error"]);
       } else {
+        console.log(results);
         inserted_job_id = results.insertId;
+        console.log(inserted_job_id);
+        console.log(shifts);
         addShifts(inserted_job_id, shifts, function (addedShifts) {
+          console.log(addedShifts);
           if (addedShifts[0] == false) {
             callback([false, "Job Created But Shifts Failed"]);
           } else {

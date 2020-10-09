@@ -371,7 +371,7 @@ router.post("/job", auth, (req, res) => {
             .json({ success: false, message: customerSiteExistence[1] });
         } else {
           checkItemExistsById(item_id, function (itemExistence) {
-            console.log(item);
+            console.log(itemExistence);
             if (itemExistence[0] == false) {
               return res
                 .status(400)
