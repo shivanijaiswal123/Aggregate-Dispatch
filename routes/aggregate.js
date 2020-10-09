@@ -48,7 +48,6 @@ const {
   selectUser,
 } = require("../db_functions/addUser.js");
 
-
 const AddCustomer = require("../db_functions/customer");
 
 const {
@@ -643,7 +642,7 @@ router.put("/quarry/:quarry_id/manager/:manager_id", auth, (req, res) => {
 router.put("/editUser", auth, (req, res) => {
   // let userId = req.user.userId;
   let user_id = req.query.user_id;
-  console.log(user_id)
+  console.log(user_id);
 
   checkUserById(user_id, function (user_existence) {
     // console.log(user_existence);
@@ -683,7 +682,7 @@ router.put("/editUser", auth, (req, res) => {
 router.put("/editRole", auth, (req, res) => {
   // let userId = req.user.userId;
   let role_id = req.query.role_id;
-  console.log(role_id)
+  console.log(role_id);
 
   checkRoleById(role_id, function (role_existence) {
     // console.log(user_existence);
@@ -771,7 +770,7 @@ router.get("/quarry", auth, (req, res) => {
   });
 });
 
-router.get("/color", auth, (req, res) => {
+router.get("/color", (req, res) => {
   getColors(function (fetchedColors) {
     if (fetchedColors[0] == false) {
       return res
@@ -816,7 +815,7 @@ router.post("/addColor", auth, (req, res) => {
   });
 });
 
-router.get("/price", auth, (req, res) => {
+router.get("/price", (req, res) => {
   getPrices(function (fetchedPrices) {
     if (fetchedPrices[0] == false) {
       return res
@@ -862,7 +861,7 @@ router.post("/addPrice", auth, (req, res) => {
   });
 });
 
-router.get("/size", auth, (req, res) => {
+router.get("/size", (req, res) => {
   getSizes(function (fetchedSizes) {
     if (fetchedSizes[0] == false) {
       return res.status(400).json({ success: false, message: fetchedSizes[1] });
@@ -903,11 +902,10 @@ router.post("/addSize", auth, (req, res) => {
   });
 });
 
-
 router.put("/editCustomer", auth, (req, res) => {
   // let userId = req.user.userId;
-  let customer_id = req.query.customer_id
-  console.log(customer_id)
+  let customer_id = req.query.customer_id;
+  console.log(customer_id);
 
   checkCustomerById(customer_id, function (customer_existence) {
     // console.log(user_existence);

@@ -355,6 +355,7 @@ router.post("/job", auth, (req, res) => {
   checkAggregateCompanyExists(aggregate_company_id, function (
     aggregateCompanyExistence
   ) {
+    console.log(aggregateCompanyExistence);
     if (aggregateCompanyExistence[0] == false) {
       return res
         .status(400)
@@ -363,12 +364,14 @@ router.post("/job", auth, (req, res) => {
       checkCustomerSiteExistsById(customer_site_id, function (
         customerSiteExistence
       ) {
+        console.log(customerSiteExistence);
         if (customerSiteExistence[0] == false) {
           return res
             .status(400)
             .json({ success: false, message: customerSiteExistence[1] });
         } else {
           checkItemExistsById(item_id, function (itemExistence) {
+            console.log(item);
             if (itemExistence[0] == false) {
               return res
                 .status(400)
