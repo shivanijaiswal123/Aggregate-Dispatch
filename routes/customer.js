@@ -6,6 +6,13 @@ const passport = require("passport");
 const auth = require("../middleware/auth");
 const config = require("config");
 const { checkCustomerExists } = require("../db_functions/customer_functions");
+
+const {
+  addComplain,
+  selectComplain,
+  getComplain,
+} = require("../db_functions/addComplain");
+
 const {
   checkCustomerSiteExistsByName,
   checkCustomerSiteExistsById,
@@ -500,6 +507,35 @@ router.get("/job/:job_id/shift", auth, (req, res) => {
             success: true,
             message: fetchedShifts[1],
             shifts: fetchedShifts[2],
+          });
+        }
+      });
+    }
+  });
+});
+
+router.post("/complain", auth, (req, res) => {
+  // var id = req.body.id;
+  var complain_type = req.body.complain_type;
+  var description = req.body.description;
+
+  addComplain(complain_type, description, function (complainInserted) {
+    console.log(complainInserted);
+    if (complainInserted[0] == false) {
+      return res
+        .status(400)
+        .json({ success: false, message: complainInserted[1] });
+    } else {
+      selectComplain(complainInserted[1], function (fetchedComplain) {
+        if (fetchedComplain[0] == false) {
+          return res
+            .status(400)
+            .json({ success: false, message: fetchedComplain[1] });
+        } else {
+          return res.status(200).json({
+            success: true,
+            message: fetchedComplain[1],
+            complain: fetchedComplain[2],
           });
         }
       });
