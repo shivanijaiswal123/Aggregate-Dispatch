@@ -3,7 +3,7 @@ var db = require("../dbSetup");
 // @description: Check Item Exists by item_id.Returns True If Exists
 // @arguments: item_id
 const checkItemExistsById = (item_id, callback) => {
-  check_item_exists = `SELECT * FROM item WHERE item_id=?`;
+  check_item_exists = `SELECT * FROM items WHERE item_id=?`;
   db.query(check_item_exists, [item_id], function (err, results) {
     if (err) {
       callback([false, "Unknown Server Error"]);
@@ -31,7 +31,7 @@ const getItems = (callback) => {
 // @description: Get Particular Item
 // @arguments: item_id
 const getItem = (item_id, callback) => {
-  get_item = `SELECT * FROM item WHERE item_id = ?`;
+  get_item = `SELECT * FROM items WHERE item_id = ?`;
   db.query(get_item, [item_id], function (err, results) {
     if (err) {
       callback([false, "Unknown Servre Error"]);
