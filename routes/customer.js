@@ -343,6 +343,7 @@ router.get("/aggregatecompany/:aggregate_company_id", auth, (req, res) => {
 // @headers: x_auth_token,
 // @body:job_name,aggregate_company_id,customer_site_id,item_id,total_quantity,
 // @body daily_minimum,interval_between_delivery,price_criteria,from_date,to_date,shifts,no_of_trucks,additional_notes,
+
 router.post("/job", auth, (req, res) => {
   let customerId = req.user.userId;
   let {

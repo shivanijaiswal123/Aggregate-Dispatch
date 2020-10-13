@@ -85,6 +85,7 @@ const getJobForCustomerByJobId = (job_id, callback) => {
       console.log(err);
       callback([false, "Unknown Server Error"]);
     } else if (results.length > 0) {
+      console.log(results);
       callback([true, "Job Fetched", results[0]]);
     } else {
       callback([false, "No Such Job"]);
@@ -159,11 +160,13 @@ const getJobsOfAggregateCompanyById = (aggregate_company_id, callback) => {
 	aggregate_company.company_name as aggregate_company_name,
   aggregate_user.name as dispatcher_name,aggregate_user.email as dispatcher_email,aggregate_user.phone_no as dispatcher_phone_no,
   customer_site.name as customer_site_name, customer_site.address_line_1 as customer_site_address_line_1,customer_site.address_line_2 as customer_site_address_line_2,customer_site.city as customer_site_city,customer_site.state as customer_site_state,customer_site.pincode as customer_site_pincode,
-  item.item_name as item_name, item.item_code as item_code  
+  item.item_name as item_name, item.item_code as item_code , 
+  customer.name as customer_name
   FROM job
   LEFT JOIN aggregate_company ON job.aggregate_company_id = aggregate_company.aggregate_company_id
   LEFT JOIN aggregate_user ON job.dispatcher_id = aggregate_user.aggregate_user_id
   LEFT JOIN customer_site ON job.customer_site_id = customer_site.customer_site_id
+  LEFT JOIN customer ON job.customer_id = customer.customer_id
   LEFT JOIN item ON job.item_id = item.item_id
   WHERE job.aggregate_company_id = ?
   `;
@@ -172,8 +175,33 @@ const getJobsOfAggregateCompanyById = (aggregate_company_id, callback) => {
     [aggregate_company_id],
     function (err, results) {
       if (err) {
+        console.log(err);
         callback([false, "Unknown Server Error"]);
       } else {
+        // console.log(results[0]);
+        query = `INSERT INTO order_detail SET ?`;
+        results.forEach((result) =>
+          db.query(
+            query,
+            {
+              customer_name: result.customer_name,
+              customer_site: result.customer_site_name,
+              order_quantity: result.total_quantity,
+              order_time: "2020-03-02",
+              order_summary: result.additional_notes,
+              status: result.job_status,
+            },
+            function (err, results) {
+              if (err) {
+                console.log(err);
+                callback([false, "Unknown Server Error"]);
+              } else {
+                console.log("demo inserted");
+              }
+            }
+          )
+        );
+
         callback([true, "Job Fetched", results]);
       }
     }

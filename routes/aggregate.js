@@ -815,6 +815,8 @@ router.post("/addColor", auth, (req, res) => {
   });
 });
 
+
+
 router.get("/price", (req, res) => {
   getPrices(function (fetchedPrices) {
     if (fetchedPrices[0] == false) {
