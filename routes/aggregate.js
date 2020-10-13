@@ -1,5 +1,6 @@
 const express = require("express");
 var db = require("../dbSetup");
+var flash = require("connect-flash");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -92,6 +93,7 @@ const {
   createJob,
   getJobForAggregateUserByJobId,
   getJobsOfAggregateCompanyById,
+
   getJobStatus,
   approveJobByDispatcher,
 } = require("../db_functions/job_functions");
@@ -815,8 +817,6 @@ router.post("/addColor", auth, (req, res) => {
   });
 });
 
-
-
 router.get("/price", (req, res) => {
   getPrices(function (fetchedPrices) {
     if (fetchedPrices[0] == false) {
@@ -1358,11 +1358,14 @@ router.get("/job", auth, (req, res) => {
       getJobsOfAggregateCompanyById(aggregate_company_id, function (
         fetchedJobs
       ) {
+        req.flash("jobs", fetchedJobs[2]);
+
         if (fetchedJobs[0] == false) {
           return res
             .status(400)
             .json({ success: false, message: fetchedJobs[1] });
         } else {
+          // console.log(fetchedJobs[2]);
           return res.status(200).json({
             success: true,
             message: fetchedJobs[1],
@@ -1372,6 +1375,13 @@ router.get("/job", auth, (req, res) => {
       });
     }
   });
+});
+
+router.get("/demo", (req, res) => {
+  let message = req.flash("jobs");
+
+  console.log(message);
+  res.json(message);
 });
 
 // @DESCRIPTION: This Route Is Used To Fetch A Particular Job Of An Aggregate Company
